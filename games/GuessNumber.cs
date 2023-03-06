@@ -14,6 +14,7 @@
         public GuessNumber()
         {
             rnd = new Random();
+            secretNumber = string.Empty;
             Name = "Guess Number";
             Description = @"
                 In Guess Number game you need guess a secret 3-digit number based on some tips. 
@@ -33,7 +34,7 @@
 
             while (true)
             {
-                Console.WriteLine("Wanna play?! Let's play !");
+                Console.WriteLine("\nWanna play?! Let's play !");
                 Console.WriteLine(string.Format("You have {0} attempts to guess the number.", MAX_GUESSES));
 
                 int guessCount = 1;
