@@ -1,11 +1,17 @@
-﻿using UGames.games;
+﻿using System;
+using Unilecs.Games;
 
-Console.WriteLine("U Games");
-TestGame();
-
-
-static void TestGame()
+public class Program
 {
-    var guessNumber = new GuessNumber();
-    guessNumber.Play();
+	public static void Main()
+    {
+        Console.WriteLine("U Games");
+        GuessNumberGame();
+    }
+
+    static void GuessNumberGame()
+    {
+        var guessNumber = new GuessNumber();
+        guessNumber.Play();
+    }
 }
