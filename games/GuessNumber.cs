@@ -1,64 +1,61 @@
-﻿namespace UGames.games
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Unilecs.Games
 {
-    internal class GuessNumber : IGame
+    internal class GuessNumber
     {
-        private readonly int NUM_DIGITS = 3;
-        private readonly int MAX_GUESSES = 10;
+        private const uint NUM_DIGITS = 3;
+        private const uint MAX_GUESSES = 10;
 
-        private readonly Random rnd;
-        private string secretNumber;
-
-        public string Name { get; }
-        public string Description { get; }
-
-        public GuessNumber()
-        {
-            rnd = new Random();
-            secretNumber = string.Empty;
-            Name = "Guess Number";
-            Description = @"
+        public const string Name = "Guess Number";
+        public readonly string Description = string.Format(@"
                 In Guess Number game you need guess a secret 3-digit number based on some tips. 
                 The game offers one of the following hints in response to your guess: 
-                    - “Almost” when your guess has a correct digit in the wrong place, 
-                    - “Right” when your guess has a correct digit in the correct place, 
-                    - and “No” if your guess has no correct digits. 
-                You have 10 tries to guess the secret number. Good luck!
-                ";
+                    - a combination of “N Almost” when your guess has N > 0 correct digit on wrong places
+                    and  “M Right” when your guess has M > 0 correct digit on the correct places, 
+                    - or “No” if your guess has no correct digits. 
+                You have {0} tries to guess the secret number. Good luck!", MAX_GUESSES);
+
+        struct MatchResult
+        {
+            public uint StrictMatches;
+            public uint WeakMatches;
         }
 
         public void Play()
         {
-            secretNumber = getSecretNumber();
             Console.WriteLine(Name);
             Console.WriteLine(Description);
 
             while (true)
             {
                 Console.WriteLine("\nWanna play?! Let's play !");
-                Console.WriteLine(string.Format("You have {0} attempts to guess the number.", MAX_GUESSES));
+                Console.WriteLine($"You have {MAX_GUESSES} attempts to guess the number.");
 
+                string secret = makeSecretNumber();
                 int guessCount = 1;
                 while (guessCount <= MAX_GUESSES)
                 {
                     string guess = "";
                     while (guess?.Length != NUM_DIGITS || !int.TryParse(guess, out int guessNum))
                     {
-                        Console.WriteLine(string.Format("Guess: {0}", guessCount));
+                        Console.WriteLine($"Enter guess {guessCount}:");
                         guess = Console.ReadLine();
                     }
 
-                    Console.WriteLine(GetTip(guess));
-                    guessCount++;
+                    Console.WriteLine(GetTip(secret, guess));
 
-                    if (guess == secretNumber)
+                    if (guess == secret)
                     {
                         break;
                     }
 
-                    if (guessCount > MAX_GUESSES)
+                    if (++guessCount > MAX_GUESSES)
                     {
                         Console.WriteLine("Game over!");
-                        Console.WriteLine(string.Format("Answer was {0}", secretNumber));
+                        Console.WriteLine($"Answer was {secret}");
                     }
                 }
 
@@ -73,44 +70,57 @@
             Console.WriteLine("Thanks for this game!");
         }
 
-        private string getSecretNumber()
+        private static string makeSecretNumber()
         {
-            int num = 0;
-            int d = 1;
-            for (int i = 0; i < NUM_DIGITS; i++)
+            var rnd = new Random();
+            var sb = new StringBuilder();
+            for (var i = 0u; i < NUM_DIGITS; ++i)
             {
-                num += rnd.Next(10) * d;
-                d *= 10;
+                sb.Append((char)(0x30 + rnd.Next(10)));
             }
-            return num.ToString();
+            return sb.ToString();
         }
 
-        private string GetTip(string guessNum)
+        private static MatchResult MatchGuess(string secret, string guess)
         {
-            if (guessNum == secretNumber)
+            var result = new MatchResult();
+            for (var i = 0; i < Math.Min(guess.Length, secret.Length); ++i)
+            {
+                if (guess[i] == secret[i])
+                {
+                    ++result.StrictMatches;
+                    continue;
+                }
+                if (secret.Contains(guess[i]))
+                {
+                    ++result.WeakMatches;
+                }
+            }
+			return result;
+        }
+
+        private static string GetTip(string secret, string guess)
+        {
+            var result = MatchGuess(secret, guess);
+            if (result.StrictMatches == secret.Length)
             {
                 return "Congrats!";
             }
 
             var tips = new List<string>();
-            for (int i = 0; i < guessNum.Length; i++)
+            if (result.StrictMatches > 0)
             {
-                if (i < secretNumber.Length && guessNum[i] == secretNumber[i])
-                {
-                    tips.Add("Right");
-                }
-                else if (secretNumber.Contains(guessNum[i]))
-                {
-                    tips.Add("Almost");
-                }
+                tips.Add($"{result.StrictMatches} Right");
+            }
+            if (result.WeakMatches > 0)
+            {
+                tips.Add($"{result.WeakMatches} Almost");
             }
 
-            if (!tips.Any())
+            if (tips.Count == 0)
             {
                 return "No";
             }
-
-            tips.Sort(); // иначе будет слишком просто
 
             return string.Join(" ", tips);
         }
