@@ -6,7 +6,7 @@ public class Program
 	public static void Main()
     {
         Console.WriteLine("U Games");
-        BitMapGame();
+        CeasarCipherGame();
     }
 
     static void GuessNumberGame()
@@ -19,5 +19,11 @@ public class Program
     {
         var bitmap = new Bitmap();
         bitmap.Play();
+    }
+
+    static void CeasarCipherGame()
+    {
+        var cc = new CeasarCipher();
+        cc.Play();
     }
 }
