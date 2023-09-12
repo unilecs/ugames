@@ -6,7 +6,7 @@ public class Program
 	public static void Main()
     {
         Console.WriteLine("U Games");
-        CeasarCipherGame();
+        CeasarHackerGame();
     }
 
     static void GuessNumberGame()
@@ -24,6 +24,12 @@ public class Program
     static void CeasarCipherGame()
     {
         var cc = new CeasarCipher();
+        cc.Play();
+    }
+
+    static void CeasarHackerGame()
+    {
+        var cc = new CeasarHacker();
         cc.Play();
     }
 }
